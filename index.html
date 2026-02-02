@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Token Studio - MVP</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .panel {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { font-size: 24px; margin-bottom: 20px; color: #333; }
+    h2 { font-size: 18px; margin-bottom: 16px; color: #666; }
+    
+    .token-editor {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .token-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    label {
+      font-weight: 500;
+      color: #555;
+      font-size: 14px;
+    }
+    input[type="color"] {
+      width: 100%;
+      height: 48px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+    }
+    
+    .preview {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .preview-box {
+      padding: 32px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    .preview-text {
+      font-size: 16px;
+      font-weight: 500;
+    }
+    .preview-button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .preview-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .export-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+    button {
+      padding: 10px 20px;
+      background: #0066CC;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #0052A3;
+    }
+    pre {
+      background: #f8f8f8;
+      padding: 16px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 13px;
+      margin-top: 12px;
+      border: 1px solid #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Editor Panel -->
+    <div class="panel">
+      <h1>🎨 Design Token Studio</h1>
+      <h2>Edit Tokens</h2>
+      
+      <div class="token-editor">
+        <div class="token-field">
+          <label for="primary">Primary Color</label>
+          <input type="color" id="primary" value="#0066CC">
+          <input type="text" id="primary-hex" value="#0066CC" readonly>
+        </div>
+        
+        <div class="token-field">
+          <label for="secondary">Secondary Color</label>
+          <input type="color" id="secondary" value="#6C757D">
+          <input type="text" id="secondary-hex" value="#6C757D" readonly>
+        </div>
+        
+        <div class="token-field">
+          <label for="background">Background Color</label>
+          <input type="color" id="background" value="#FFFFFF">
+          <input type="text" id="background-hex" value="#FFFFFF" readonly>
+        </div>
+        
+        <div class="token-field">
+          <label for="text">Text Color</label>
+          <input type="color" id="text" value="#333333">
+          <input type="text" id="text-hex" value="#333333" readonly>
+        </div>
+      </div>
+      
+      <div class="export-section">
+        <h2>Export</h2>
+        <button onclick="exportTokens()">📋 Copy JSON</button>
+        <pre id="json-output"></pre>
+      </div>
+    </div>
+    
+    <!-- Live Preview Panel -->
+    <div class="panel">
+      <h2>Live Preview</h2>
+      <div class="preview">
+        <div class="preview-box" id="preview-box">
+          <p class="preview-text" id="preview-text">This is preview text</p>
+          <br>
+          <button class="preview-button" id="preview-button">Click Me</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Token state
+    const tokens = {
+      primary: '#0066CC',
+      secondary: '#6C757D',
+      background: '#FFFFFF',
+      text: '#333333'
+    };
+
+    // Update tokens and preview
+    function updateToken(name, value) {
+      tokens[name] = value;
+      document.getElementById(`${name}-hex`).value = value;
+      updatePreview();
+      updateJSON();
+    }
+
+    // Live preview
+    function updatePreview() {
+      const box = document.getElementById('preview-box');
+      const text = document.getElementById('preview-text');
+      const button = document.getElementById('preview-button');
+      
+      box.style.backgroundColor = tokens.background;
+      text.style.color = tokens.text;
+      button.style.backgroundColor = tokens.primary;
+      button.style.color = tokens.background;
+    }
+
+    // JSON output
+    function updateJSON() {
+      const output = {
+        colors: tokens,
+        generated: new Date().toISOString()
+      };
+      document.getElementById('json-output').textContent = JSON.stringify(output, null, 2);
+    }
+
+    // Export to clipboard
+    function exportTokens() {
+      const json = document.getElementById('json-output').textContent;
+      navigator.clipboard.writeText(json);
+      alert('✅ Copied to clipboard!');
+    }
+
+    // Event listeners
+    ['primary', 'secondary', 'background', 'text'].forEach(name => {
+      document.getElementById(name).addEventListener('input', (e) => {
+        updateToken(name, e.target.value);
+      });
+    });
+
+    // Initialize
+    updatePreview();
+    updateJSON();
+  </script>
+</body>
+</html>
